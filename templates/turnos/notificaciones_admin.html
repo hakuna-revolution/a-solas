@@ -1,0 +1,165 @@
+<!-- turnos/templates/turnos/notificaciones_admin.html -->
+{% extends 'turnos/base.html' %}
+{% load custom_tags %}
+
+{% block contenido %}
+<div class="container-fluid px-4">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h2 class="display-6 text-primary">
+                <i class="bi bi-bell-fill me-2"></i>Notificaciones de Solicitudes de Baja
+            </h2>
+        </div>
+        <div class="col-auto">
+            {% if solicitudes_pendientes_count > 0 %}
+                <span class="badge bg-info">
+                    Total: {{ solicitudes_pendientes_count }} Solicitudes
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if solicitudes_pendientes %}
+                <form method="post" action="{% url 'turnos:notificaciones_admin' %}">
+                    {% csrf_token %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">
+                                        <input type="checkbox" id="select-all">
+                                    </th>
+                                    <th class="text-muted fw-normal">
+                                        <i class="bi bi-person me-2"></i>Usuario/Suplente
+                                    </th>
+                                    <th class="text-muted fw-normal">
+                                        <i class="bi bi-clock me-2"></i>Turno
+                                    </th>
+                                    <th class="text-muted fw-normal">
+                                        <i class="bi bi-calendar-check me-2"></i>Fecha de Solicitud
+                                    </th>
+                                    <th class="text-muted fw-normal">
+                                        <i class="bi bi-info-circle me-2"></i>Estado
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for solicitud in solicitudes_pendientes %}
+                                    <tr class="align-middle">
+                                        <td>
+                                            <input type="checkbox" name="solicitud_ids" value="{{ solicitud.id }}" class="select-item solicitud-checkbox">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle bg-primary text-white me-3 d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px;">
+                                                    {% if solicitud.inscripcion.usuario %}
+                                                        {{ solicitud.inscripcion.usuario.username|first|upper }}
+                                                    {% else %}
+                                                        {{ solicitud.inscripcion.nombre_suplente|first|upper }}
+                                                    {% endif %}
+                                                </div>
+                                                <span>
+                                                    {% if solicitud.inscripcion.usuario %}
+                                                        {{ solicitud.inscripcion.usuario.username|capfirst }}
+                                                    {% else %}
+                                                        {{ solicitud.inscripcion.nombre_suplente|capfirst }}
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ solicitud.inscripcion.turno }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-hourglass-split me-1"></i>Pendiente
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <button type="submit" name="action" value="aprobar" class="btn btn-success me-2" onclick="return confirm('¿Estás seguro de que deseas aprobar las solicitudes seleccionadas?');">
+                                <i class="bi bi-check-circle me-1"></i>Aprobar Seleccionadas
+                            </button>
+                            <button type="submit" name="action" value="rechazar" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas rechazar las solicitudes seleccionadas?');">
+                                <i class="bi bi-x-circle me-1"></i>Rechazar Seleccionadas
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-2"></i>Última actualización: 
+                            {% now "d/m/Y H:i" %}
+                        </small>
+                    </div>
+                </form>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox-fill text-muted" style="font-size: 3rem;"></i>
+                    <p class="lead text-muted mt-3">No hay notificaciones pendientes</p>
+                </div>
+            {% endif %}
+        </div>
+        {% if solicitudes_pendientes %}
+            <div class="card-footer bg-light">
+                <!-- Opcional: Paginación si es necesaria -->
+                <!-- Puedes implementar paginación aquí si tienes muchas solicitudes -->
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Script para seleccionar/deseleccionar todos los checkboxes
+    document.getElementById('select-all').addEventListener('change', function(e) {
+        const checkboxes = document.querySelectorAll('.select-item');
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
+</script>
+{% endblock %}
+
+<style>
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    /* Estilo para los badges de estado */
+    .badge-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    .badge-success {
+        background-color: #198754 !important;
+    }
+
+    .badge-danger {
+        background-color: #dc3545 !important;
+    }
+
+    .badge-secondary {
+        background-color: #6c757d !important;
+    }
+</style>

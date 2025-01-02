@@ -1,0 +1,237 @@
+{% extends 'turnos/base.html' %}
+{% load custom_tags %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.css">
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid px-4 py-3">
+    <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>Turnos Sin Inscripciones
+            </h2>
+            <span class="badge bg-light text-danger">{{ semana_actual }}</span>
+        </div>
+        
+        <div class="card-body">
+            {% if turnos_por_dia %}
+                {% for dia, turnos in turnos_por_dia.items %}
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h4 class="text-primary mb-0">{{ dia }}</h4>
+                            <small class="text-muted">{{ turnos|length }} turno(s) sin inscripción</small>
+                        </div>
+                        
+                        {% if turnos %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover text-center">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center">
+                                                <i class="bi bi-clock me-2"></i>Hora
+                                            </th>
+                                            <th class="text-center">
+                                                <i class="bi bi-info-circle me-2"></i>Estado
+                                            </th>
+                                            <th class="text-center">
+                                                <i class="bi bi-gear me-2"></i>Acciones
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for turno in turnos %}
+                                            <tr>
+                                                <td class="text-center">
+                                                    <span class="badge bg-secondary-subtle text-secondary">
+                                                        {{ turno.hora }}:00 - {{ turno.hora|add:"1" }}:00
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-warning-subtle text-warning">
+                                                        <i class="bi bi-calendar-x me-1"></i>Sin Inscripciones
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if user.is_authenticated and user.is_staff %}
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-outline-danger btn-eliminar-turno" 
+                                                                data-turno-id="{{ turno.id }}" 
+                                                                data-turno-nombre="{{ turno }}"
+                                                                data-bs-toggle="tooltip" 
+                                                                title="Eliminar este turno">
+                                                            <i class="bi bi-trash-fill me-1"></i>Eliminar
+                                                        </button>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if not forloop.last %}
+                        <hr class="my-3">
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-success d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill me-3"></i>
+                    <div>
+                        Todos los turnos tienen al menos una inscripción. ¡Excelente!
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        {% if not turnos_por_dia %}
+            <div class="card-footer text-center">
+                <a href="{% url 'crear_turnos' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Crear Nuevos Turnos
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-bar-chart-line me-2"></i>Turnos Sin Inscripción por Día
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="turnosSinInscripcionChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-pie-chart me-2"></i>Distribución de Turnos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="distribucionTurnosChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Datos para los gráficos
+        const diasSinInscripcion = [
+            {% for dia, turnos in turnos_por_dia.items %}
+                {{ turnos|length }},
+            {% endfor %}
+        ];
+
+        const diasNombres = [
+            {% for dia, turnos in turnos_por_dia.items %}
+                '{{ dia }}',
+            {% endfor %}
+        ];
+
+        // Gráfico de Turnos Sin Inscripción por Día
+        const turnosSinInscripcionCtx = document.getElementById('turnosSinInscripcionChart').getContext('2d');
+        new Chart(turnosSinInscripcionCtx, {
+            type: 'bar',
+            data: {
+                labels: diasNombres,
+                datasets: [{
+                    label: 'Turnos Sin Inscripción',
+                    data: diasSinInscripcion,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Número de Turnos'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Distribución de Turnos
+        const distribucionTurnosCtx = document.getElementById('distribucionTurnosChart').getContext('2d');
+        new Chart(distribucionTurnosCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Turnos Con Inscripción', 'Turnos Sin Inscripción'],
+                datasets: [{
+                    data: [
+                        {{ turnos_con_inscripcion }}, 
+                        {{ turnos_por_dia|length }}
+                    ],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(255, 99, 132, 0.6)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Delete turn confirmation (same as before)
+        const deleteButtons = document.querySelectorAll('.btn-eliminar-turno');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const turnoId = this.getAttribute('data-turno-id');
+                const turnoNombre = this.getAttribute('data-turno-nombre');
+                
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: `Vas a eliminar el turno ${turnoNombre}`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // AJAX call to delete the turn would go here
+                        Swal.fire(
+                            'Eliminado',
+                            'El turno ha sido eliminado.',
+                            'success'
+                        )
+                    }
+                })
+            });
+        });
+    });
+</script>
+{% endblock %}

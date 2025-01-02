@@ -1,0 +1,51 @@
+<!-- turnos/templates/turnos/notificar_ausencia.html -->
+
+{% extends 'turnos/base.html' %}
+{% load custom_tags %}
+
+{% block contenido %}
+<div class="container px-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="text-primary">Confirmar Baja de Turno</h2>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Turno: {{ turno }}</h5>
+            <p class="card-text">
+                Fecha: {{ turno.get_dia_display }}<br>
+                Hora: {{ turno.hora }}:00 - {{ turno.hora|add:"1" }}:00
+            </p>
+
+            <p class="text-warning">
+                Tu solicitud de baja estará pendiente hasta que un administrador la apruebe.
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas solicitar la baja de este turno?');">
+                    <i class="bi bi-dash-circle me-1"></i> Confirmar Baja
+                </button>
+                <a href="{% url 'turnos:mis_turnos' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 1rem;
+        }
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>

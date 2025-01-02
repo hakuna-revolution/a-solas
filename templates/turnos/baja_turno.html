@@ -1,0 +1,25 @@
+<!-- templates/turnos/baja_turno.html -->
+
+{% extends 'turnos/base.html' %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Darse de Baja del Turno</h5>
+                </div>
+                <div class="card-body">
+                    <p>¿Estás seguro de que deseas darte de baja del turno <strong>{{ inscripcion.turno }}</strong>?</p>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Sí, darme de Baja</button>
+                        <a href="{% url 'turnos:calendario' %}" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

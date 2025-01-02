@@ -1,0 +1,29 @@
+/* turnos/static/css/styles.css */
+
+/* Asegurar que los modales no excedan el ancho de la pantalla en móviles */
+.modal-dialog {
+    max-width: 90%;
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 500px;
+    }
+}
+
+/* Ajustar márgenes y padding para mejorar la visualización en móviles */
+@media (max-width: 576px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+/* Asegurar que los botones dentro de los formularios sean fácilmente tocables */
+.btn-danger, .btn-primary {
+    min-width: 120px;
+}

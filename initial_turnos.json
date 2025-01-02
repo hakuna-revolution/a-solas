@@ -1,0 +1,25 @@
+[
+    {
+        "model": "turnos.turno",
+        "pk": 1,
+        "fields": {
+            "dia": 0,
+            "hora": 13,
+            "es_fijo": false,
+            "usuario_fijo": null,
+            "max_inscripciones": 3
+        }
+    },
+    {
+        "model": "turnos.turno",
+        "pk": 2,
+        "fields": {
+            "dia": 0,
+            "hora": 12,
+            "es_fijo": false,
+            "usuario_fijo": null,
+            "max_inscripciones": 3
+        }
+    }
+    
+]

@@ -1,0 +1,203 @@
+<!-- templates/turnos/admin_usuarios.html -->
+
+{% extends 'turnos/base.html' %}
+{% load custom_tags %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-primary">
+                <i class="bi bi-people-fill me-2"></i>Administración de Usuarios
+            </h2>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Usuarios</h5>
+                    <p class="display-4 text-primary">{{ total_usuarios }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Usuarios Staff</h5>
+                    <p class="display-4 text-success">{{ total_staff }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Usuarios Activos</h5>
+                    <p class="display-4 text-info">{{ total_activos }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <form method="GET" class="d-flex">
+                <input type="search" name="q" class="form-control me-2" 
+                       placeholder="Buscar usuarios..." 
+                       value="{{ request.GET.q }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="card-body">
+            <!-- Formulario para acciones masivas -->
+            <form method="POST">
+                {% csrf_token %}
+                <div class="d-flex justify-content-between mb-2">
+                    <div>
+                        <select name="action" class="form-select w-auto d-inline">
+                            <option value="">Acciones Masivas</option>
+                            <option value="activar">Activar Seleccionados</option>
+                            <option value="desactivar">Desactivar Seleccionados</option>
+                            <option value="hacer_staff">Hacer Staff</option>
+                            <option value="quitar_staff">Quitar Staff</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Aplicar</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col"><input type="checkbox" id="select-all"></th>
+                                <th>Nombre de Usuario</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Inscripciones</th>
+                                <th>Staff</th>
+                                <th>Activo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario in usuarios %}
+                            <tr>
+                                <td><input type="checkbox" name="selected_users" value="{{ usuario.id }}" class="user-checkbox"></td>
+                                <td>
+                                    <a href="{% url 'turnos:admin_usuario_detalle' usuario.id %}" class="text-decoration-none">
+                                        {{ usuario.username }}
+                                    </a>
+                                </td>
+                                <td>{{ usuario.email|default:"-" }}</td>
+                                <td>{{ usuario.profile.telefono|default:"-" }}</td>
+                                <td>{{ usuario.total_inscripciones }}</td>
+                                <td>
+                                    <span class="badge {% if usuario.is_staff %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ usuario.is_staff|yesno:"Sí,No" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if usuario.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ usuario.is_active|yesno:"Activo,Inactivo" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <!-- Toggle Staff Button -->
+                                        <form method="POST" action="{% url 'turnos:admin_usuario_toggle_staff' usuario.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm {% if usuario.is_staff %}btn-warning{% else %}btn-success{% endif %}" title="{% if usuario.is_staff %}Desactivar Staff{% else %}Activar Staff{% endif %}">
+                                                <i class="bi {% if usuario.is_staff %}bi-person-dash{% else %}bi-person-check{% endif %}"></i>
+                                            </button>
+                                        </form>
+                                        <!-- Toggle Activo Button -->
+                                        <form method="POST" action="{% url 'turnos:admin_usuario_toggle_activo' usuario.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm {% if usuario.is_active %}btn-danger{% else %}btn-primary{% endif %}" title="{% if usuario.is_active %}Desactivar Usuario{% else %}Activar Usuario{% endif %}">
+                                                <i class="bi {% if usuario.is_active %}bi-lock{% else %}bi-unlock{% endif %}"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted">No se encontraron usuarios</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+        <!-- Paginación añadida anteriormente -->
+        <div class="row">
+            <div class="col-12 d-flex justify-content-center">
+                <nav aria-label="Paginación">
+                    <ul class="pagination">
+                        {% if usuarios.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ request.GET.q }}&page={{ usuarios.previous_page_number }}" aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                            </li>
+                        {% endif %}
+    
+                        {% for num in usuarios.paginator.page_range %}
+                            {% if usuarios.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > usuarios.number|add:'-3' and num < usuarios.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+    
+                        {% if usuarios.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ request.GET.q }}&page={{ usuarios.next_page_number }}" aria-label="Siguiente">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAllCheckbox = document.getElementById('select-all');
+        const userCheckboxes = document.querySelectorAll('.user-checkbox');
+
+        selectAllCheckbox.addEventListener('change', function() {
+            userCheckboxes.forEach(function(checkbox) {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+
+        userCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    selectAllCheckbox.checked = false;
+                } else {
+                    const allChecked = Array.from(userCheckboxes).every(cb => cb.checked);
+                    selectAllCheckbox.checked = allChecked;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

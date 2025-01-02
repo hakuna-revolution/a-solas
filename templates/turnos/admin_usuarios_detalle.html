@@ -1,0 +1,84 @@
+<!-- templates/turnos/admin_usuario_detalle.html -->
+
+{% extends 'turnos/base.html' %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-primary">
+                <i class="bi bi-person-fill me-2"></i>Detalles de Usuario: {{ usuario.username }}
+            </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información Personal -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Información Personal
+                </div>
+                <div class="card-body">
+                    <p><strong>Nombre de Usuario:</strong> {{ usuario.username }}</p>
+                    <p><strong>Email:</strong> {{ usuario.email|default:"-" }}</p>
+                    <p><strong>Teléfono:</strong> {{ usuario.profile.telefono|default:"-" }}</p>
+                    <p><strong>Staff:</strong> 
+                        <span class="badge {% if usuario.is_staff %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ usuario.is_staff|yesno:"Sí,No" }}
+                        </span>
+                    </p>
+                    <p><strong>Activo:</strong> 
+                        <span class="badge {% if usuario.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ usuario.is_active|yesno:"Activo,Inactivo" }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inscripciones -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    Inscripciones
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Día</th>
+                                <th>Hora</th>
+                                <th>Tipo de Inscripción</th>
+                                <th>Fecha de Inscripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inscripcion in inscripciones %}
+                            <tr>
+                                <td>{{ inscripcion.turno.get_dia_display }}</td>
+                                <td>{{ inscripcion.turno.hora }}:00</td>
+                                <td>
+                                    {% if inscripcion.usuario %}
+                                        <span class="badge bg-success">Fijo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Suplente</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    No hay inscripciones
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends 'turnos/base.html' %}
+{% load custom_tags %}
+
+{% block contenido %}
+<div class="container-fluid px-4">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h2 class="display-6 text-primary">
+                <i class="bi bi-list-check me-3"></i>Solicitudes de Baja
+            </h2>
+        </div>
+        <div class="col-auto">
+            <span class="badge bg-warning">
+                Total: {{ solicitudes|length }} Solicitudes
+            </span>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if solicitudes %}
+            <form method="post" id="solicitudesForm">
+                {% csrf_token %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="select-all">
+                                    </div>
+                                </th>
+                                <th class="text-muted fw-normal">
+                                    <i class="bi bi-person me-2"></i>Usuario/Suplente
+                                </th>
+                                <th class="text-muted fw-normal">
+                                    <i class="bi bi-clock me-2"></i>Turno
+                                </th>
+                                <th class="text-muted fw-normal">
+                                    <i class="bi bi-calendar-check me-2"></i>Fecha de Solicitud
+                                </th>
+                                <th class="text-muted fw-normal">
+                                    <i class="bi bi-gear me-2"></i>Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for solicitud in solicitudes %}
+                            <tr>
+                                <td class="text-center">
+                                    <div class="form-check">
+                                        <input class="form-check-input solicitud-checkbox" 
+                                               type="checkbox" 
+                                               name="solicitud_ids" 
+                                               value="{{ solicitud.id }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if solicitud.inscripcion.usuario %}
+                                        <span>{{ solicitud.inscripcion.usuario.username }}</span>
+                                    {% else %}
+                                        <span>{{ solicitud.inscripcion.nombre_suplente }} <small class="text-muted">(Suplente)</small></span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        {{ solicitud.inscripcion.turno }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-success btn-sm view-details" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#detallesModal"
+                                                data-usuario="{% if solicitud.inscripcion.usuario %}{{ solicitud.inscripcion.usuario.username }}{% else %}{{ solicitud.inscripcion.nombre_suplente }}{% endif %}"
+                                                data-turno="{{ solicitud.inscripcion.turno }}"
+                                                data-fecha="{{ solicitud.fecha_solicitud|date:'d/m/Y H:i' }}">
+                                            <i class="bi bi-eye me-1"></i>Detalles
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <button type="submit" name="action" value="aprobar" class="btn btn-success me-2">
+                            <i class="bi bi-check-circle me-1"></i>Aprobar Seleccionadas
+                        </button>
+                        <button type="submit" name="action" value="rechazar" class="btn btn-danger">
+                            <i class="bi bi-x-circle me-1"></i>Rechazar Seleccionadas
+                        </button>
+                    </div>
+                    <div>
+                        <small class="text-muted">
+                            <span id="selected-count">0</span> solicitudes seleccionadas
+                        </small>
+                    </div>
+                </div>
+            </form>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox-fill text-muted" style="font-size: 3rem;"></i>
+                    <p class="lead text-muted mt-3">No hay solicitudes de baja pendientes</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalles -->
+<div class="modal fade" id="detallesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles de Solicitud</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Usuario/Suplente:</strong> <span id="modal-usuario"></span></p>
+                <p><strong>Turno:</strong> <span id="modal-turno"></span></p>
+                <p><strong>Fecha de Solicitud:</strong> <span id="modal-fecha"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const solicitudCheckboxes = document.querySelectorAll('.solicitud-checkbox');
+    const selectedCountSpan = document.getElementById('selected-count');
+    const viewDetailsButtons = document.querySelectorAll('.view-details');
+
+    selectAllCheckbox.addEventListener('change', function() {
+        solicitudCheckboxes.forEach((checkbox) => {
+            checkbox.checked = this.checked;
+        });
+        updateSelectedCount();
+    });
+
+    solicitudCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', updateSelectedCount);
+    });
+
+    function updateSelectedCount() {
+        const selectedCount = document.querySelectorAll('.solicitud-checkbox:checked').length;
+        selectedCountSpan.textContent = selectedCount;
+    }
+
+    viewDetailsButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            document.getElementById('modal-usuario').textContent = this.getAttribute('data-usuario');
+            document.getElementById('modal-turno').textContent = this.getAttribute('data-turno');
+            document.getElementById('modal-fecha').textContent = this.getAttribute('data-fecha');
+        });
+    });
+});
+</script>
+{% endblock %}
