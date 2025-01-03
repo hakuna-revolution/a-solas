@@ -241,7 +241,7 @@ def turnos_vacios(request):
     return render(request, 'turnos/turnos_vacios.html', context)
 
 @staff_member_required
-def añadir_turno(request):
+def anadir_turno(request):
     if request.method == 'POST':
         form = TurnoForm(request.POST)
         if form.is_valid():
@@ -252,7 +252,7 @@ def añadir_turno(request):
                     request,
                     f'La hora debe estar entre {Turno.HORA_INICIO}:00 y {Turno.HORA_FIN - 1}:00.'
                 )
-                return redirect('turnos:añadir_turno')
+                return redirect('turnos:anadir_turno')
 
             turno.es_completo_calculado = False
             turno.save()
@@ -267,7 +267,7 @@ def añadir_turno(request):
     context = {
         'form': form,
     }
-    return render(request, 'turnos/añadir_turno.html', {'form': form})
+    return render(request, 'turnos/anadir_turno.html', {'form': form})
 
 
 @staff_member_required

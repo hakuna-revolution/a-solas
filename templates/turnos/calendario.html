@@ -7,16 +7,16 @@
 <div class="container-fluid">
     <!-- Mensajes de Django -->
     {% if messages %}
-        <div class="row">
-            <div class="col-12">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                    </div>
-                {% endfor %}
+    <div class="row">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
             </div>
+            {% endfor %}
         </div>
+    </div>
     {% endif %}
 
     <!-- Encabezado del Calendario -->
@@ -26,18 +26,19 @@
                 <i class="bi bi-calendar3 me-2"></i> Calendario Semanal de Turnos
                 <small class="text-muted h6">{{ semana_actual }}</small>
             </h2>
-            
+
             {% if user.is_authenticated and user.is_staff %}
             <div class="d-flex align-items-center gap-2">
                 <!-- Botón Añadir Turno -->
-                <a href="{% url 'turnos:añadir_turno' %}" class="btn btn-primary">
+                <a href="{% url 'turnos:anadir_turno' %}" class="btn btn-primary">
                     <i class="bi bi-plus-circle me-1"></i>Añadir Turno
                 </a>
 
                 <!-- Botón Limpiar Suplentes -->
                 <form method="POST" action="{% url 'turnos:limpiar_suplentes' %}" class="d-inline">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar todas las inscripciones de suplentes de esta semana? Esta acción no se puede deshacer.');">
+                    <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('¿Estás seguro de que deseas eliminar todas las inscripciones de suplentes de esta semana? Esta acción no se puede deshacer.');">
                         <i class="bi bi-trash-fill me-1"></i>Limpiar Suplentes
                     </button>
                 </form>
@@ -46,10 +47,10 @@
                 <a href="{% url 'turnos:notificaciones_admin' %}" class="btn btn-info position-relative">
                     <i class="bi bi-bell me-1"></i>Notificaciones Admin
                     {% if solicitudes_pendientes_count > 0 %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            {{ solicitudes_pendientes_count }}
-                            <span class="visually-hidden">solicitudes pendientes</span>
-                        </span>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ solicitudes_pendientes_count }}
+                        <span class="visually-hidden">solicitudes pendientes</span>
+                    </span>
                     {% endif %}
                 </a>
 
@@ -69,306 +70,308 @@
                 <tr>
                     <th scope="col" class="text-center">Hora</th>
                     {% for dia, numero in dias_semana.items %}
-                        <th scope="col" class="text-center">{{ dia }} {{ numero }}</th>
+                    <th scope="col" class="text-center">{{ dia }} {{ numero }}</th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
                 <!-- Iterar sobre las horas de 9 a 19 -->
                 {% for hora in 9|range_filter:19 %}
-                    <tr>
-                        <th scope="row" class="text-center align-middle">{{ hora }}:00</th>
-                        {% for dia, turnos in calendario.items %}
-                            <td class="p-2">
-                                {% for turno in turnos %}
-                                    {% if turno.hora == hora %}
-                                        <div class="card mb-3 
-                                            {% if turno.es_completo_calculado %}bg-light{% endif %} 
-                                            {% if turno.es_completo_calculado %}style="pointer-events: none; opacity: 0.6;"{% endif %}
-                                        ">
-                                            <div class="card-body p-3">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <h6 class="card-title m-0">
-                                                        {{ turno.hora }}:00 - {{ turno.hora|add:"1" }}:00
-                                                    </h6>
-                                                    <small class="text-muted">
-                                                        {{ turno.inscripciones_count }}/{{ turno.max_inscripciones }}
-                                                    </small>
-                                                </div>
+                <tr>
+                    <th scope="row" class="text-center align-middle">{{ hora }}:00</th>
+                    {% for dia, turnos in calendario.items %}
+                    <td class="p-2">
+                        {% for turno in turnos %}
+                        {% if turno.hora == hora %}
+                        {% if turno.es_completo_calculado %}
+                        <div class="card mb-3 bg-light">
+                            {% endif %}
+                            {% if turno.es_completo_calculado %}
+                            <div class="card mb-3" style="pointer-events: none; opacity:
+                            0.6;">
+                                {% endif %}
+                                <div class=" card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="card-title m-0">
+                                            {{ turno.hora }}:00 - {{ turno.hora|add:"1" }}:00
+                                        </h6>
+                                        <small class="text-muted">
+                                            {{ turno.inscripciones_count }}/{{ turno.max_inscripciones }}
+                                        </small>
+                                    </div>
 
-                                                <!-- Indicador de Solicitudes de Baja Pendientes con Conteo -->
-                                                {% if turno.pending_bajas_count > 0 %}
-                                                    <span class="badge bg-warning text-dark mb-2">
-                                                        <i class="bi bi-hourglass-split me-1"></i> 
-                                                        {{ turno.pending_bajas_count }} Solicitud{% if turno.pending_bajas_count > 1 %}es{% endif %} de Baja Pendiente{% if turno.pending_bajas_count > 1 %}s{% endif %}
-                                                    </span>
-                                                {% endif %}
+                                    <!-- Indicador de Solicitudes de Baja Pendientes con Conteo -->
+                                    {% if turno.pending_bajas_count > 0 %}
+                                    <span class="badge bg-warning text-dark mb-2">
+                                        <i class="bi bi-hourglass-split me-1"></i>
+                                        {{ turno.pending_bajas_count }} Solicitud{% if turno.pending_bajas_count > 1
+                                        %}es{%
+                                        endif %} de Baja Pendiente{% if turno.pending_bajas_count > 1 %}s{% endif %}
+                                    </span>
+                                    {% endif %}
 
-                                                <!-- Botón para Eliminar Turno (Solo Admin) -->
-                                                {% if user.is_authenticated and user.is_staff %}
-                                                    <button type="button" class="btn btn-sm btn-danger btn-eliminar-turno mb-2" 
-                                                            data-turno-id="{{ turno.id }}" 
-                                                            data-turno-nombre="{{ turno }}">
-                                                        <i class="bi bi-trash-fill me-1"></i>Eliminar Turno
-                                                    </button>
-                                                {% endif %}
+                                    <!-- Botón para Eliminar Turno (Solo Admin) -->
+                                    {% if user.is_authenticated and user.is_staff %}
+                                    <button type="button" class="btn btn-sm btn-danger btn-eliminar-turno mb-2"
+                                        data-turno-id="{{ turno.id }}" data-turno-nombre="{{ turno }}">
+                                        <i class="bi bi-trash-fill me-1"></i>Eliminar Turno
+                                    </button>
+                                    {% endif %}
 
-                                                <!-- Notificación de ausencia (si aplica) -->
-                                                {% if turno.ausencia_notificada %}
-                                                    <div class="alert alert-warning py-1 px-2 mb-2">
-                                                        <small>
-                                                            <strong>Ausencia Notificada:</strong> 
-                                                            {{ turno.ausencia_notificada.fecha_solicitud|date:"d/m/Y" }}
-                                                        </small>
-                                                    </div>
-                                                {% endif %}
+                                    <!-- Notificación de ausencia (si aplica) -->
+                                    {% if turno.ausencia_notificada %}
+                                    <div class="alert alert-warning py-1 px-2 mb-2">
+                                        <small>
+                                            <strong>Ausencia Notificada:</strong>
+                                            {{ turno.ausencia_notificada.fecha_solicitud|date:"d/m/Y" }}
+                                        </small>
+                                    </div>
+                                    {% endif %}
 
-                                                <div class="inscripciones-container mb-2">
-                                                    <p class="mb-1"><strong>Inscritos:</strong></p>
-                                                    <ul class="list-group list-group-flush small">
-                                                        {% for insc in turno.inscripciones.all %}
-                                                            <li class="list-group-item d-flex justify-content-between align-items-center p-1">
-                                                                <span>
-                                                                    <i class="bi bi-person-fill me-1"></i>
-                                                                    {% if insc.usuario %}
-                                                                        {{ insc.usuario.username }}
-                                                                        {% if mostrar_telefonos and insc.usuario.profile.telefono %}
-                                                                            - Teléfono: {{ insc.usuario.profile.telefono }}
-                                                                        {% endif %}
-                                                                        <span class="badge bg-success ms-2">Fijo</span>
-                                                                    {% else %}
-                                                                        {{ insc.nombre_suplente }}
-                                                                        {% if mostrar_telefonos and insc.telefono_suplente %}
-                                                                            - Teléfono: {{ insc.telefono_suplente }}
-                                                                        {% endif %}
-                                                                        <span class="badge bg-secondary ms-2">Suplente</span>
-                                                                    {% endif %}
-                                                                </span>
-                                                                {% if user.is_authenticated and user.is_staff and not insc.usuario %}
-                                                                    <!-- Botón para que el administrador elimine la inscripción de un suplente -->
-                                                                    <button type="button" class="btn btn-sm btn-danger btn-eliminar-suplente" 
-                                                                            data-inscripcion-id="{{ insc.id }}" 
-                                                                            data-persona-nombre="{{ insc.nombre_suplente }}">
-                                                                        <i class="bi bi-x-circle"></i>Desinscribir
-                                                                    </button>
-                                                                {% endif %}
-                                                            </li>
-                                                        {% empty %}
-                                                            <li class="list-group-item text-muted small p-1">
-                                                                No hay inscripciones
-                                                            </li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
-
-                                                <div class="actions text-end">
-                                                    {% if turno.es_completo_calculado %}
-                                                        <span class="badge bg-warning text-dark">
-                                                            <i class="bi bi-exclamation-triangle me-1"></i>Turno completo
-                                                        </span>
-                                                    {% else %}
-                                                        {% if user.is_authenticated %}
-                                                            {% if turno.ya_inscrito and not turno.has_pending_bajas %}
-                                                                <!-- Botón para darse de baja -->
-                                                                <button type="button" class="btn btn-sm btn-danger btn-darse-de-baja" 
-                                                                        data-inscripcion-id="{{ turno.inscripcion_usuario_id }}" 
-                                                                        data-turno-nombre="{{ turno }}">
-                                                                    <i class="bi bi-dash-circle me-1"></i>Darme de Baja
-                                                                </button>
-                                                            {% else %}
-                                                                <!-- Botón para inscribirse como Fijo -->
-                                                                <a href="{% url 'turnos:inscribir_turno' turno.id %}" 
-                                                                   class="btn btn-sm btn-success mb-2">
-                                                                    <i class="bi bi-plus-circle me-1"></i>Inscribirse como Fijo
-                                                                </a>
-                                                            {% endif %}
-                                                            
-                                                            <!-- Condición: Mostrar botón de suplente solo si el usuario NO está inscrito como fijo -->
-                                                            {% if not turno.ya_inscrito %}
-                                                                <!-- Botón para Inscribirse como Suplente -->
-                                                                <button 
-                                                                    type="button" 
-                                                                    class="btn btn-sm btn-primary inscribir-btn" 
-                                                                    data-dia="{{ turno.dia }}" 
-                                                                    data-hora="{{ turno.hora }}"
-                                                                >
-                                                                    <i class="bi bi-person-plus me-1"></i>Inscribirse como Suplente
-                                                                </button>
-                                                            {% endif %}
-                                                        {% else %}
-                                                            <!-- Botón para Inscribirse como Suplente (Usuarios no autenticados) -->
-                                                            <button 
-                                                                type="button" 
-                                                                class="btn btn-sm btn-primary inscribir-btn" 
-                                                                data-dia="{{ turno.dia }}" 
-                                                                data-hora="{{ turno.hora }}"
-                                                            >
-                                                                <i class="bi bi-person-plus me-1"></i>Inscribirse como Suplente
-                                                            </button>
-                                                        {% endif %}
+                                    <div class="inscripciones-container mb-2">
+                                        <p class="mb-1"><strong>Inscritos:</strong></p>
+                                        <ul class="list-group list-group-flush small">
+                                            {% for insc in turno.inscripciones.all %}
+                                            <li
+                                                class="list-group-item d-flex justify-content-between align-items-center p-1">
+                                                <span>
+                                                    <i class="bi bi-person-fill me-1"></i>
+                                                    {% if insc.usuario %}
+                                                    {{ insc.usuario.username }}
+                                                    {% if mostrar_telefonos and insc.usuario.profile.telefono %}
+                                                    - Teléfono: {{ insc.usuario.profile.telefono }}
                                                     {% endif %}
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                                                    <span class="badge bg-success ms-2">Fijo</span>
+                                                    {% else %}
+                                                    {{ insc.nombre_suplente }}
+                                                    {% if mostrar_telefonos and insc.telefono_suplente %}
+                                                    - Teléfono: {{ insc.telefono_suplente }}
+                                                    {% endif %}
+                                                    <span class="badge bg-secondary ms-2">Suplente</span>
+                                                    {% endif %}
+                                                </span>
+                                                {% if user.is_authenticated and user.is_staff and not insc.usuario %}
+                                                <!-- Botón para que el administrador elimine la inscripción de un suplente -->
+                                                <button type="button"
+                                                    class="btn btn-sm btn-danger btn-eliminar-suplente"
+                                                    data-inscripcion-id="{{ insc.id }}"
+                                                    data-persona-nombre="{{ insc.nombre_suplente }}">
+                                                    <i class="bi bi-x-circle"></i>Desinscribir
+                                                </button>
+                                                {% endif %}
+                                            </li>
+                                            {% empty %}
+                                            <li class="list-group-item text-muted small p-1">
+                                                No hay inscripciones
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
 
-        <!-- Panel de Administración (Visible solo para staff) -->
-        {% if user.is_authenticated and user.is_staff %}
-        <div class="mt-5">
-            <h3 class="text-secondary mb-3">Panel de Administración</h3>
-            <div class="card">
-                <div class="card-body d-flex justify-content-center">
-                    <a href="{% url 'turnos:solicitudes_baja' %}" class="btn btn-warning me-2">
-                        <i class="bi bi-list-check me-1"></i>Ver Solicitudes de Baja
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+                                    <div class="actions text-end">
+                                        {% if turno.es_completo_calculado %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Turno completo
+                                        </span>
+                                        {% else %}
+                                        {% if user.is_authenticated %}
+                                        {% if turno.ya_inscrito and not turno.has_pending_bajas %}
+                                        <!-- Botón para darse de baja -->
+                                        <button type="button" class="btn btn-sm btn-danger btn-darse-de-baja"
+                                            data-inscripcion-id="{{ turno.inscripcion_usuario_id }}"
+                                            data-turno-nombre="{{ turno }}">
+                                            <i class="bi bi-dash-circle me-1"></i>Darme de Baja
+                                        </button>
+                                        {% else %}
+                                        <!-- Botón para inscribirse como Fijo -->
+                                        <a href="{% url 'turnos:inscribir_turno' turno.id %}"
+                                            class="btn btn-sm btn-success mb-2">
+                                            <i class="bi bi-plus-circle me-1"></i>Inscribirse como Fijo
+                                        </a>
+                                        {% endif %}
+
+                                        <!-- Condición: Mostrar botón de suplente solo si el usuario NO está inscrito como fijo -->
+                                        {% if not turno.ya_inscrito %}
+                                        <!-- Botón para Inscribirse como Suplente -->
+                                        <button type="button" class="btn btn-sm btn-primary inscribir-btn"
+                                            data-dia="{{ turno.dia }}" data-hora="{{ turno.hora }}">
+                                            <i class="bi bi-person-plus me-1"></i>Inscribirse como Suplente
+                                        </button>
+                                        {% endif %}
+                                        {% else %}
+                                        <!-- Botón para Inscribirse como Suplente (Usuarios no autenticados) -->
+                                        <button type="button" class="btn btn-sm btn-primary inscribir-btn"
+                                            data-dia="{{ turno.dia }}" data-hora="{{ turno.hora }}">
+                                            <i class="bi bi-person-plus me-1"></i>Inscribirse como Suplente
+                                        </button>
+                                        {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <!-- Modal para Confirmar Inscripción Suplente -->
-    <div class="modal fade" id="inscribirSuplenteModal" tabindex="-1" aria-labelledby="inscribirSuplenteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <form id="inscribirSuplenteForm" method="POST" action="{% url 'turnos:inscribir_suplente' %}">
+    <!-- Panel de Administración (Visible solo para staff) -->
+    {% if user.is_authenticated and user.is_staff %}
+    <div class="mt-5">
+        <h3 class="text-secondary mb-3">Panel de Administración</h3>
+        <div class="card">
+            <div class="card-body d-flex justify-content-center">
+                <a href="{% url 'turnos:solicitudes_baja' %}" class="btn btn-warning me-2">
+                    <i class="bi bi-list-check me-1"></i>Ver Solicitudes de Baja
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal para Confirmar Inscripción Suplente -->
+<div class="modal fade" id="inscribirSuplenteModal" tabindex="-1" aria-labelledby="inscribirSuplenteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="inscribirSuplenteForm" method="POST" action="{% url 'turnos:inscribir_suplente' %}">
             {% csrf_token %}
             <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="inscribirSuplenteModalLabel">Inscribirse como Suplente</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-              </div>
-              <div class="modal-body">
-                <div class="mb-3">
-                  <label for="nombreSuplente" class="form-label">Nombre Completo</label>
-                  <input type="text" class="form-control" id="nombreSuplente" name="nombre_suplente" required>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inscribirSuplenteModalLabel">Inscribirse como Suplente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="mb-3">
-                  <label for="telefonoSuplente" class="form-label">Número de Teléfono</label>
-                  <input type="tel" class="form-control" id="telefonoSuplente" name="telefono_suplente" required>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nombreSuplente" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="nombreSuplente" name="nombre_suplente" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefonoSuplente" class="form-label">Número de Teléfono</label>
+                        <input type="tel" class="form-control" id="telefonoSuplente" name="telefono_suplente" required>
+                    </div>
+                    <input type="hidden" id="diaSuplente" name="dia">
+                    <input type="hidden" id="horaSuplente" name="hora">
                 </div>
-                <input type="hidden" id="diaSuplente" name="dia">
-                <input type="hidden" id="horaSuplente" name="hora">
-              </div>
-              <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Inscribirse</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Inscribirse</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
             </div>
-          </form>
-        </div>
+        </form>
     </div>
+</div>
 
-    <!-- Modal para Confirmar Eliminación de Suplente -->
-    <div class="modal fade" id="eliminarSuplenteModal" tabindex="-1" aria-labelledby="eliminarSuplenteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" id="eliminarSuplenteForm">
-                {% csrf_token %}
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-danger" id="eliminarSuplenteModalLabel">
-                            <i class="bi bi-exclamation-triangle-fill"></i> Confirmar Eliminación de Suplente
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>¿Estás seguro de que deseas eliminar a <strong id="nombreSuplente"></strong> de este turno? Esta acción no se puede deshacer.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">Eliminar Suplente</button>
-                    </div>
+<!-- Modal para Confirmar Eliminación de Suplente -->
+<div class="modal fade" id="eliminarSuplenteModal" tabindex="-1" aria-labelledby="eliminarSuplenteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" id="eliminarSuplenteForm">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="eliminarSuplenteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Confirmar Eliminación de Suplente
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Confirmar Baja de Turno (Usuarios Fijos) -->
-    <div class="modal fade" id="bajaTurnoModal" tabindex="-1" aria-labelledby="bajaTurnoModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" id="bajaTurnoForm">
-                {% csrf_token %}
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-danger" id="bajaTurnoModalLabel">
-                            <i class="bi bi-exclamation-triangle-fill"></i> Confirmar Baja de Turno
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>¿Estás seguro de que deseas darte de baja de <strong id="turnoBajaNombre"></strong>? Tu solicitud de baja estará pendiente hasta que un administrador la apruebe.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">Darse de Baja</button>
-                    </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar a <strong id="nombreSuplente"></strong> de este turno? Esta
+                        acción no se puede deshacer.</p>
                 </div>
-            </form>
-        </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar Suplente</button>
+                </div>
+            </div>
+        </form>
     </div>
+</div>
 
-    <!-- JavaScript para manejar los modales de baja y eliminación de suplentes -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Manejar botones de inscripción para suplentes
-            document.querySelectorAll('.inscribir-btn').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    const dia = this.getAttribute('data-dia');
-                    const hora = this.getAttribute('data-hora');
+<!-- Modal para Confirmar Baja de Turno (Usuarios Fijos) -->
+<div class="modal fade" id="bajaTurnoModal" tabindex="-1" aria-labelledby="bajaTurnoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" id="bajaTurnoForm">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="bajaTurnoModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Confirmar Baja de Turno
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas darte de baja de <strong id="turnoBajaNombre"></strong>? Tu solicitud
+                        de baja estará pendiente hasta que un administrador la apruebe.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Darse de Baja</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-                    // Configurar los campos ocultos del modal
-                    document.getElementById('diaSuplente').value = dia;
-                    document.getElementById('horaSuplente').value = hora;
+<!-- JavaScript para manejar los modales de baja y eliminación de suplentes -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Manejar botones de inscripción para suplentes
+        document.querySelectorAll('.inscribir-btn').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const dia = this.getAttribute('data-dia');
+                const hora = this.getAttribute('data-hora');
 
-                    // Limpiar los campos de entrada
-                    document.getElementById('nombreSuplente').value = '';
-                    document.getElementById('telefonoSuplente').value = '';
+                // Configurar los campos ocultos del modal
+                document.getElementById('diaSuplente').value = dia;
+                document.getElementById('horaSuplente').value = hora;
 
-                    // Mostrar el modal de inscripción de suplente
-                    const inscribirSuplenteModal = new bootstrap.Modal(document.getElementById('inscribirSuplenteModal'));
-                    inscribirSuplenteModal.show();
-                });
+                // Limpiar los campos de entrada
+                document.getElementById('nombreSuplente').value = '';
+                document.getElementById('telefonoSuplente').value = '';
+
+                // Mostrar el modal de inscripción de suplente
+                const inscribirSuplenteModal = new bootstrap.Modal(document.getElementById('inscribirSuplenteModal'));
+                inscribirSuplenteModal.show();
             });
+        });
 
-            // Manejar el envío del formulario de inscripción de suplente via AJAX
-            document.getElementById('inscribirSuplenteForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const nombreSuplente = document.getElementById('nombreSuplente').value.trim();
-                const telefonoSuplente = document.getElementById('telefonoSuplente').value.trim();
-                const dia = document.getElementById('diaSuplente').value;
-                const hora = document.getElementById('horaSuplente').value;
+        // Manejar el envío del formulario de inscripción de suplente via AJAX
+        document.getElementById('inscribirSuplenteForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-                // Validar que se haya ingresado un nombre y teléfono
-                if (!nombreSuplente) {
-                    alert('Por favor, ingrese su nombre.');
-                    return;
-                }
-                if (!telefonoSuplente) {
-                    alert('Por favor, ingrese su número de teléfono.');
-                    return;
-                }
+            const nombreSuplente = document.getElementById('nombreSuplente').value.trim();
+            const telefonoSuplente = document.getElementById('telefonoSuplente').value.trim();
+            const dia = document.getElementById('diaSuplente').value;
+            const hora = document.getElementById('horaSuplente').value;
 
-                // Enviar solicitud de inscripción via AJAX
-                fetch("{% url 'turnos:inscribir_suplente' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    },
-                    body: JSON.stringify({
-                        dia: parseInt(dia),
-                        hora: parseInt(hora),
-                        nombre_suplente: nombreSuplente,
-                        telefono_suplente: telefonoSuplente
-                    })
+            // Validar que se haya ingresado un nombre y teléfono
+            if (!nombreSuplente) {
+                alert('Por favor, ingrese su nombre.');
+                return;
+            }
+            if (!telefonoSuplente) {
+                alert('Por favor, ingrese su número de teléfono.');
+                return;
+            }
+
+            // Enviar solicitud de inscripción via AJAX
+            fetch("{% url 'turnos:inscribir_suplente' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    dia: parseInt(dia),
+                    hora: parseInt(hora),
+                    nombre_suplente: nombreSuplente,
+                    telefono_suplente: telefonoSuplente
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -377,7 +380,7 @@
                         if (inscribirSuplenteModal) {
                             inscribirSuplenteModal.hide();
                         }
-                        
+
                         // Mostrar mensaje de éxito
                         alert(data.message);
                         // Recargar la página para reflejar los cambios
@@ -391,76 +394,76 @@
                     console.error('Error:', error);
                     alert('Hubo un problema al inscribirse. Intente nuevamente.');
                 });
-            });
+        });
 
-            // Manejar botones de "Darse de Baja" para usuarios fijos
-            document.querySelectorAll('.btn-darse-de-baja').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    const inscripcionId = this.getAttribute('data-inscripcion-id');
-                    const turnoNombre = this.getAttribute('data-turno-nombre');
+        // Manejar botones de "Darse de Baja" para usuarios fijos
+        document.querySelectorAll('.btn-darse-de-baja').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const inscripcionId = this.getAttribute('data-inscripcion-id');
+                const turnoNombre = this.getAttribute('data-turno-nombre');
 
-                    // Configurar el formulario en el modal
-                    const bajaTurnoForm = document.getElementById('bajaTurnoForm');
-                    bajaTurnoForm.action = "{% url 'turnos:baja_turno' 0 %}".replace('/0/', '/' + inscripcionId + '/');
+                // Configurar el formulario en el modal
+                const bajaTurnoForm = document.getElementById('bajaTurnoForm');
+                bajaTurnoForm.action = "{% url 'turnos:baja_turno' 0 %}".replace('/0/', '/' + inscripcionId + '/');
 
-                    // Actualizar el nombre del turno en el modal
-                    const turnoBajaNombre = document.getElementById('turnoBajaNombre');
-                    turnoBajaNombre.textContent = turnoNombre;
+                // Actualizar el nombre del turno en el modal
+                const turnoBajaNombre = document.getElementById('turnoBajaNombre');
+                turnoBajaNombre.textContent = turnoNombre;
 
-                    // Mostrar el modal
-                    const bajaTurnoModal = new bootstrap.Modal(document.getElementById('bajaTurnoModal'));
-                    bajaTurnoModal.show();
-                });
-            });
-
-            // Manejar botones de eliminar suplente
-            document.querySelectorAll('.btn-eliminar-suplente').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    const inscripcionId = this.getAttribute('data-inscripcion-id');
-                    const personaNombre = this.getAttribute('data-persona-nombre');
-
-                    // Configurar el formulario de eliminación de suplente
-                    const eliminarSuplenteForm = document.getElementById('eliminarSuplenteForm');
-                    eliminarSuplenteForm.action = "{% url 'turnos:eliminar_suplente' 0 %}".replace('/0/', '/' + inscripcionId + '/');
-
-                    // Actualizar el nombre de la persona en el modal
-                    const nombreSuplenteSpan = document.getElementById('nombreSuplente');
-                    nombreSuplenteSpan.textContent = personaNombre;
-
-                    // Mostrar el modal de eliminación de suplente
-                    const eliminarSuplenteModal = new bootstrap.Modal(document.getElementById('eliminarSuplenteModal'));
-                    eliminarSuplenteModal.show();
-                });
-            });
-
-            // Manejar botones de eliminar turno (Solo Admin)
-            document.querySelectorAll('.btn-eliminar-turno').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    const turnoId = this.getAttribute('data-turno-id');
-                    const turnoNombre = this.getAttribute('data-turno-nombre');
-
-                    // Configurar el formulario de eliminación de turno
-                    const eliminarTurnoForm = document.createElement('form');
-                    eliminarTurnoForm.method = 'POST';
-                    eliminarTurnoForm.action = "{% url 'turnos:eliminar_turno' 0 %}".replace('/0/', '/' + turnoId + '/');
-
-                    // Añadir CSRF token
-                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                    const csrfInput = document.createElement('input');
-                    csrfInput.type = 'hidden';
-                    csrfInput.name = 'csrfmiddlewaretoken';
-                    csrfInput.value = csrfToken;
-                    eliminarTurnoForm.appendChild(csrfInput);
-
-                    // Confirmación antes de eliminar
-                    if (confirm(`¿Estás seguro de que deseas eliminar el turno "${turnoNombre}"? Esta acción no se puede deshacer.`)) {
-                        document.body.appendChild(eliminarTurnoForm);
-                        eliminarTurnoForm.submit();
-                    }
-                });
+                // Mostrar el modal
+                const bajaTurnoModal = new bootstrap.Modal(document.getElementById('bajaTurnoModal'));
+                bajaTurnoModal.show();
             });
         });
-    </script>
+
+        // Manejar botones de eliminar suplente
+        document.querySelectorAll('.btn-eliminar-suplente').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const inscripcionId = this.getAttribute('data-inscripcion-id');
+                const personaNombre = this.getAttribute('data-persona-nombre');
+
+                // Configurar el formulario de eliminación de suplente
+                const eliminarSuplenteForm = document.getElementById('eliminarSuplenteForm');
+                eliminarSuplenteForm.action = "{% url 'turnos:eliminar_suplente' 0 %}".replace('/0/', '/' + inscripcionId + '/');
+
+                // Actualizar el nombre de la persona en el modal
+                const nombreSuplenteSpan = document.getElementById('nombreSuplente');
+                nombreSuplenteSpan.textContent = personaNombre;
+
+                // Mostrar el modal de eliminación de suplente
+                const eliminarSuplenteModal = new bootstrap.Modal(document.getElementById('eliminarSuplenteModal'));
+                eliminarSuplenteModal.show();
+            });
+        });
+
+        // Manejar botones de eliminar turno (Solo Admin)
+        document.querySelectorAll('.btn-eliminar-turno').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const turnoId = this.getAttribute('data-turno-id');
+                const turnoNombre = this.getAttribute('data-turno-nombre');
+
+                // Configurar el formulario de eliminación de turno
+                const eliminarTurnoForm = document.createElement('form');
+                eliminarTurnoForm.method = 'POST';
+                eliminarTurnoForm.action = "{% url 'turnos:eliminar_turno' 0 %}".replace('/0/', '/' + turnoId + '/');
+
+                // Añadir CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                eliminarTurnoForm.appendChild(csrfInput);
+
+                // Confirmación antes de eliminar
+                if (confirm(`¿Estás seguro de que deseas eliminar el turno "${turnoNombre}"? Esta acción no se puede deshacer.`)) {
+                    document.body.appendChild(eliminarTurnoForm);
+                    eliminarTurnoForm.submit();
+                }
+            });
+        });
+    });
+</script>
 </div>
 
 <!-- Modal de Detalles (Opcional) -->
@@ -485,6 +488,7 @@
         .table-responsive {
             font-size: 0.9rem;
         }
+
         .btn-sm {
             padding: 0.25rem 0.5rem;
             font-size: 0.75rem;
@@ -527,14 +531,14 @@
 {% block scripts %}
 <script>
     // Función para seleccionar/deseleccionar todos los checkboxes en solicitudes_baja.html (si aplica)
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const selectAllCheckbox = document.getElementById('select-all');
         if (selectAllCheckbox) {
             const solicitudCheckboxes = document.querySelectorAll('.solicitud-checkbox');
             const selectedCountSpan = document.getElementById('selected-count');
 
             // Checkbox selection logic
-            selectAllCheckbox.addEventListener('change', function() {
+            selectAllCheckbox.addEventListener('change', function () {
                 solicitudCheckboxes.forEach((checkbox) => {
                     checkbox.checked = this.checked;
                 });
@@ -542,10 +546,10 @@
             });
 
             solicitudCheckboxes.forEach((checkbox) => {
-                checkbox.addEventListener('change', function() {
+                checkbox.addEventListener('change', function () {
                     updateSelectedCount();
                     // Uncheck 'select all' if not all checkboxes are checked
-                    selectAllCheckbox.checked = 
+                    selectAllCheckbox.checked =
                         Array.from(solicitudCheckboxes).every(cb => cb.checked);
                 });
             });
