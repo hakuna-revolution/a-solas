@@ -16,3 +16,20 @@ def range_filter(value, arg):
         return range(start, end)
     except (ValueError, TypeError):
         return []
+
+#añade victor para progreso lineal
+@register.filter
+def multiply(value, arg):
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return 0
+
+@register.filter
+def percentage(part, whole):
+    try:
+        part = float(part)
+        whole = float(whole)
+        return (part / whole) * 100 if whole != 0 else 0
+    except (ValueError, TypeError):
+        return 0

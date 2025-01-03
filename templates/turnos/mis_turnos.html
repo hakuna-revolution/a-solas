@@ -3,7 +3,7 @@
 {% extends 'turnos/base.html' %}
 
 {% block contenido %}
-<div class="container px-4">
+<div class="container">
     <div class="row mb-4">
         <div class="col">
             <h2 class="text-primary">Mis Turnos</h2>
@@ -13,104 +13,110 @@
     <div class="card shadow-sm">
         <div class="card-body">
             {% if inscripciones %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Día</th>
-                                <th>Hora</th>
-                                <th>Tipo</th>
-                                <th>Estado de Baja</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for insc in inscripciones %}
-                                <tr>
-                                    <td>{{ insc.turno.get_dia_display }}</td>
-                                    <td>{{ insc.turno.hora }}:00 - {{ insc.turno.hora|add:"1" }}:00</td>
-                                    <td>
-                                        {% if insc.usuario %}
-                                            <span class="badge bg-success">Fijo</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">Suplente</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if insc.solicitudes_baja.exists %}
-                                            {% with solicitud=insc.solicitudes_baja.first %}
-                                                {% if solicitud.aprobado %}
-                                                    <span class="badge bg-success">
-                                                        <i class="bi bi-check-lg me-1"></i>Baja Aprobada
-                                                    </span>
-                                                {% elif solicitud.rechazado %}
-                                                    <span class="badge bg-danger">
-                                                        <i class="bi bi-x-lg me-1"></i>Baja Rechazada
-                                                    </span>
-                                                {% else %}
-                                                    <span class="badge bg-warning text-dark">
-                                                        <i class="bi bi-hourglass-split me-1"></i>Baja Pendiente
-                                                    </span>
-                                                {% endif %}
-                                            {% endwith %}
-                                        {% else %}
-                                            <span class="badge bg-secondary">Sin Solicitar</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if not insc.solicitudes_baja.exists and insc.usuario == user %}
-                                            <!-- Botón para abrir el modal de confirmación -->
-                                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmBajaModal{{ insc.id }}">
-                                                <i class="bi bi-dash-circle me-1"></i>Darse de Baja
-                                            </button>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Día</th>
+                            <th>Hora</th>
+                            <th>Tipo</th>
+                            <th>Estado de Baja</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for insc in inscripciones %}
+                        <tr>
+                            <td>{{ insc.turno.get_dia_display }}</td>
+                            <td>{{ insc.turno.hora }}:00 - {{ insc.turno.hora|add:"1" }}:00</td>
+                            <td>
+                                {% if insc.usuario %}
+                                <span class="badge bg-success">Fijo</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Suplente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if insc.solicitudes_baja.exists %}
+                                {% with solicitud=insc.solicitudes_baja.first %}
+                                {% if solicitud.aprobado %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-lg me-1"></i>Baja Aprobada
+                                </span>
+                                {% elif solicitud.rechazado %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-lg me-1"></i>Baja Rechazada
+                                </span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-hourglass-split me-1"></i>Baja Pendiente
+                                </span>
+                                {% endif %}
+                                {% endwith %}
+                                {% else %}
+                                <span class="badge bg-secondary">Sin Solicitar</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not insc.solicitudes_baja.exists and insc.usuario == user %}
+                                <!-- Botón para abrir el modal de confirmación -->
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#confirmBajaModal{{ insc.id }}">
+                                    <i class="bi bi-dash-circle me-1"></i>Darse de Baja
+                                </button>
 
-                                            <!-- Modal de Confirmación -->
-                                            <div class="modal fade" id="confirmBajaModal{{ insc.id }}" tabindex="-1" aria-labelledby="confirmBajaLabel{{ insc.id }}" aria-hidden="true">
-                                              <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                  <div class="modal-header">
-                                                    <h5 class="modal-title" id="confirmBajaLabel{{ insc.id }}">Confirmar Baja</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                                  </div>
-                                                  <div class="modal-body">
-                                                    ¿Estás seguro de que deseas solicitar la baja de este turno?
-                                                    <p class="mt-2"><strong>Turno:</strong> {{ insc.turno }}</p>
-                                                    <p class="mb-0"><strong>Fecha:</strong> {{ insc.turno.get_dia_display }} {{ insc.turno.hora }}:00 - {{ insc.turno.hora|add:"1" }}:00</p>
-                                                  </div>
-                                                  <div class="modal-footer">
-                                                    <form action="{% url 'turnos:baja_turno' insc.id %}" method="post">
-                                                        {% csrf_token %}
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                        <button type="submit" class="btn btn-danger">
-                                                            <i class="bi bi-dash-circle me-1"></i> Confirmar Baja
-                                                        </button>
-                                                    </form>
-                                                  </div>
-                                                </div>
-                                              </div>
+                                <!-- Modal de Confirmación -->
+                                <div class="modal fade" id="confirmBajaModal{{ insc.id }}" tabindex="-1"
+                                    aria-labelledby="confirmBajaLabel{{ insc.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="confirmBajaLabel{{ insc.id }}">Confirmar
+                                                    Baja</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Cerrar"></button>
                                             </div>
-                                        {% elif insc.solicitudes_baja.exists %}
-                                            {% with solicitud=insc.solicitudes_baja.first %}
-                                                {% if solicitud.aprobado %}
-                                                    <span class="text-success">Tu baja ha sido aprobada.</span>
-                                                {% elif solicitud.rechazado %}
-                                                    <span class="text-danger">Tu solicitud de baja ha sido rechazada.</span>
-                                                {% else %}
-                                                    <span class="text-warning">Tu solicitud de baja está pendiente de aprobación.</span>
-                                                {% endif %}
-                                            {% endwith %}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                            <div class="modal-body">
+                                                ¿Estás seguro de que deseas solicitar la baja de este turno?
+                                                <p class="mt-2"><strong>Turno:</strong> {{ insc.turno }}</p>
+                                                <p class="mb-0"><strong>Fecha:</strong> {{ insc.turno.get_dia_display }}
+                                                    {{ insc.turno.hora }}:00 - {{ insc.turno.hora|add:"1" }}:00</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form action="{% url 'turnos:baja_turno' insc.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="bi bi-dash-circle me-1"></i> Confirmar Baja
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% elif insc.solicitudes_baja.exists %}
+                                {% with solicitud=insc.solicitudes_baja.first %}
+                                {% if solicitud.aprobado %}
+                                <span class="text-success">Tu baja ha sido aprobada.</span>
+                                {% elif solicitud.rechazado %}
+                                <span class="text-danger">Tu solicitud de baja ha sido rechazada.</span>
+                                {% else %}
+                                <span class="text-warning">Tu solicitud de baja está pendiente de aprobación.</span>
+                                {% endif %}
+                                {% endwith %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-                <div class="text-center py-4">
-                    <i class="bi bi-inbox-fill text-muted" style="font-size: 3rem;"></i>
-                    <p class="lead text-muted mt-3">No tienes turnos inscritos.</p>
-                </div>
+            <div class="text-center py-4">
+                <i class="bi bi-inbox-fill text-muted" style="font-size: 3rem;"></i>
+                <p class="lead text-muted mt-3">No tienes turnos inscritos.</p>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -126,6 +132,7 @@
         .table-responsive {
             font-size: 0.9rem;
         }
+
         .btn-sm {
             padding: 0.25rem 0.5rem;
             font-size: 0.75rem;
