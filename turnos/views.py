@@ -89,7 +89,8 @@ def calendario(request):
         Prefetch('inscripciones', queryset=Inscripcion.objects.select_related('usuario').all())
     ).order_by('dia', 'hora')
 
-    mostrar_telefonos = request.user.is_authenticated and request.user.is_staff
+    mostrar_telefonos = request.user.is_authenticated 
+    #and request.user.is_staff
 
     # Organizar los turnos en un diccionario ordenado con día como clave
     calendario = OrderedDict()

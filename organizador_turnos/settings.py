@@ -148,5 +148,42 @@ EMAIL_HOST_PASSWORD = get_env_variable('EMAIL_HOST_PASSWORD')
 # Dirección de correo predeterminada
 DEFAULT_FROM_EMAIL = get_env_variable('DEFAULT_FROM_EMAIL')
 
+#LOGS - registro de errores
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/asolas/django/debug.log',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'my_logger': {  # Logger personalizado
+             'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+         'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
+    },
+}
+
+
 
 

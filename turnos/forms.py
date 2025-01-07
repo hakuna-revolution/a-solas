@@ -4,27 +4,90 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Turno, Inscripcion, SolicitudBaja, Profile
+from django.db import transaction
+import logging
+
+my_logger = logging.getLogger('my_logger')
+
+
 
 class UserRegistrationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-    telefono = forms.CharField(max_length=20, required=False, help_text='Opcional: Número de teléfono.')
-    
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Correo electrónico'
+        }),
+        label='Correo Electrónico'
+    )
+    telefono = forms.CharField(
+        max_length=20,
+        required=True,
+        help_text='Número de teléfono obligatorio.',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de teléfono'}),
+        label='Teléfono'
+    )  
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre de usuario'
+        }),
+        label='Nombre de Usuario'
+    )  
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Contraseña'
+        }),
+        label='Contraseña'
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirmar contraseña'
+        }),
+        label='Confirmar Contraseña'
+    )  
     class Meta:
         model = User
         fields = ['username', 'email', 'telefono', 'password1', 'password2']
     
     def save(self, commit=True):
+        my_logger.debug("Iniciando el método save para el registro del usuario.")
+        
+        # Crear el objeto de usuario, sin guardar aún en la base de datos
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
+        
         if commit:
-            user.save()
-            # Guardar el perfil asociado
-            telefono = self.cleaned_data.get('telefono')
-            if telefono:
-                Profile.objects.update_or_create(user=user, defaults={'telefono': telefono})
-            else:
-                Profile.objects.update_or_create(user=user)
+            with transaction.atomic():  # Aseguramos que todo se guarde en una transacción
+                user.save()
+                my_logger.debug(f"Usuario {user.username} guardado.")
+
+                # Obtener el teléfono del formulario
+                telefono = self.cleaned_data.get('telefono')
+                my_logger.debug(f"Teléfono recibido: {telefono}")
+
+                # Validar y asignar el teléfono al perfil
+                if telefono:
+                    try:
+                        profile, created = Profile.objects.update_or_create(
+                            user=user,
+                            defaults={'telefono': telefono}
+                        )
+                        my_logger.debug(f"Perfil {'creado' if created else 'actualizado'} para el usuario {user.username}. Teléfono guardado: {profile.telefono}")
+                    except Exception as e:
+                        my_logger.error(f"Error al guardar el teléfono para el usuario {user.username}: {str(e)}")
+                else:
+                    my_logger.warning(f"No se proporcionó teléfono para el usuario {user.username}.")
+        else:
+            my_logger.debug("El commit es False, no se guarda el usuario ni el perfil.")
+        
         return user
+
+
+
 
 
 class TurnoForm(forms.ModelForm):

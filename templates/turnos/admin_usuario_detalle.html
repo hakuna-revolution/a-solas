@@ -22,13 +22,13 @@
                 <div class="card-body">
                     <p><strong>Nombre de Usuario:</strong> {{ usuario.username }}</p>
                     <p><strong>Email:</strong> {{ usuario.email|default:"-" }}</p>
-                    <p><strong>Teléfono:</strong> {{ usuario.profile.telefono|default:"-" }}</p>
-                    <p><strong>Staff:</strong> 
+                    <p><strong>Teléfono:</strong> {{ usuario.profile.telefono|default:"(sin especificar)" }}</p>
+                    <p><strong>Staff:</strong>
                         <span class="badge {% if usuario.is_staff %}bg-success{% else %}bg-secondary{% endif %}">
                             {{ usuario.is_staff|yesno:"Sí,No" }}
                         </span>
                     </p>
-                    <p><strong>Activo:</strong> 
+                    <p><strong>Activo:</strong>
                         <span class="badge {% if usuario.is_active %}bg-success{% else %}bg-danger{% endif %}">
                             {{ usuario.is_active|yesno:"Activo,Inactivo" }}
                         </span>
@@ -60,9 +60,9 @@
                                 <td>{{ inscripcion.turno.hora }}:00</td>
                                 <td>
                                     {% if inscripcion.usuario %}
-                                        <span class="badge bg-success">Fijo</span>
+                                    <span class="badge bg-success">Fijo</span>
                                     {% else %}
-                                        <span class="badge bg-secondary">Suplente</span>
+                                    <span class="badge bg-secondary">Suplente</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}</td>

@@ -135,14 +135,20 @@
                                                     <i class="bi bi-person-fill me-1"></i>
                                                     {% if insc.usuario %}
                                                     {{ insc.usuario.username }}
-                                                    {% if mostrar_telefonos and insc.usuario.profile.telefono %}
-                                                    {{ insc.usuario.profile.telefono }}
+                                                    {% if mostrar_telefonos%}
+                                                    <a href="tel:{{ insc.usuario.profile.telefono }}"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-telephone"></i>
+                                                    </a>
                                                     {% endif %}
                                                     <span class="badge bg-success ms-2">Fijo</span>
                                                     {% else %}
                                                     {{ insc.nombre_suplente }}
                                                     {% if mostrar_telefonos and insc.telefono_suplente %}
-                                                    - Teléfono: {{ insc.telefono_suplente }}
+                                                    <a href="tel:{{ insc.telefono_suplente }}"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-telephone"></i>
+                                                    </a>
                                                     {% endif %}
                                                     <span class="badge bg-secondary ms-2">Suplente</span>
                                                     {% endif %}

@@ -130,12 +130,13 @@ class Profile(models.Model):
 @receiver(post_save, sender=User)
 def crear_perfil_usuario(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
+        Profile.objects.create(user=instance, telefono=getattr(instance, 'telefono', None))
 
 
-@receiver(post_save, sender=User)
-def guardar_perfil_usuario(sender, instance, **kwargs):
-    instance.profile.save()
+#ESTA FUNCIÓN CABRONA ME JODIÓ LA VIDA, se sobreescribia
+#@receiver(post_save, sender=User)
+#def guardar_perfil_usuario(sender, instance, **kwargs):
+#    instance.profile.save()
 
 
 # @receiver(post_save, sender=SolicitudBaja)
