@@ -21,8 +21,9 @@ class Turno(models.Model):
         (4, 'Viernes'),
     ]
 
+    #AJUSTAR HORARIOS TURNOS AQUÍ 9 - 20h
     HORA_INICIO = 9
-    HORA_FIN = 19
+    HORA_FIN = 20
 
     dia = models.IntegerField(choices=DIA_SEMANA)
     hora = models.IntegerField()

@@ -53,6 +53,28 @@
             </div>
             {% endif %}
         </div>
+        <!-- Nueva fila para ubicación -->
+        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-3">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                <span>El Estudio de Hakuna</span>
+            </div>
+            <a href="https://www.google.com/maps?q=Fundaci%C3%B3n+Hakuna" target="_blank"
+                class="btn btn-outline-primary">
+                <i class="bi bi-map me-1"></i>Cómo llegar
+            </a>
+        </div>
+
+        <!-- Nueva fila para contacto WhatsApp -->
+        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-2">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-whatsapp text-success me-2"></i>
+                <span>Dudas: Ana Camarena</span>
+            </div>
+            <a href="https://wa.me/34610635590" target="_blank" class="btn btn-outline-success">
+                <i class="bi bi-chat-dots me-1"></i>Contactar por WhatsApp
+            </a>
+        </div>
     </div>
 
     <!-- Tabla del Calendario -->
@@ -67,8 +89,8 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Iterar sobre las horas de 9 a 19 -->
-                {% for hora in 9|range_filter:19 %}
+                <!-- Iterar sobre las horas de 9 a 20 -->
+                {% for hora in 9|range_filter:20 %}
                 <tr>
                     <th scope="row" class="text-center align-middle">{{ hora }}:00</th>
                     {% for dia, turnos in calendario.items %}
@@ -126,7 +148,7 @@
                                     {% endif %}
 
                                     <div class="inscripciones-container mb-2">
-                                        <p class="mb-1"><strong>Inscritos:</strong></p>
+                                        <!--p class="mb-1"><strong>Inscritos:</strong></p-->
                                         <ul class="list-group list-group-flush small">
                                             {% for insc in turno.inscripciones.all %}
                                             <li
@@ -165,7 +187,7 @@
                                             </li>
                                             {% empty %}
                                             <li class="list-group-item text-muted small p-1">
-                                                No hay inscripciones
+                                                ¡Libre! Apúntate ⬇️
                                             </li>
                                             {% endfor %}
                                         </ul>

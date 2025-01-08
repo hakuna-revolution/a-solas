@@ -11,10 +11,10 @@ DIA_SEMANA = [
 ]
 
 HORA_INICIO = 9
-HORA_FIN = 19
+HORA_FIN = 20
 
-MAX_INSCRIPCIONES_SUPLENTE = 5  # Puedes ajustar este valor
-MAX_INSCRIPCIONES_FIJO = 5     # Para turnos fijos
+MAX_INSCRIPCIONES_SUPLENTE = 4  # Puedes ajustar este valor
+MAX_INSCRIPCIONES_FIJO = 4     # Para turnos fijos
 
 # Asume que ya tienes usuarios con pk=1 y pk=2 en la base de datos
 # Puedes crear estos usuarios manualmente o mediante otra fixture
@@ -30,7 +30,6 @@ for dia, dia_nombre in DIA_SEMANA:
             "fields": {
                 "dia": dia,
                 "hora": hora,
-                "es_fijo": False,
                 "usuario_fijo": None,
                 "max_inscripciones": MAX_INSCRIPCIONES_SUPLENTE,
                 "es_completo": False

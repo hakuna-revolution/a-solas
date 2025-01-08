@@ -157,28 +157,28 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
         'file': {
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': '/var/log/asolas/django/debug.log',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': 'ERROR',
     },
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
-            'level': 'INFO',
+            'level': 'ERROR',
             'propagate': True,
         },
         'my_logger': {  # Logger personalizado
              'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'propagate': True,
         },
          'django.db.backends': {
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'handlers': ['console'],
         },
     },

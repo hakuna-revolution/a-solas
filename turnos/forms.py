@@ -54,7 +54,6 @@ class UserRegistrationForm(UserCreationForm):
         fields = ['username', 'email', 'telefono', 'password1', 'password2']
     
     def save(self, commit=True):
-        my_logger.debug("Iniciando el método save para el registro del usuario.")
         
         # Crear el objeto de usuario, sin guardar aún en la base de datos
         user = super().save(commit=False)
@@ -63,11 +62,9 @@ class UserRegistrationForm(UserCreationForm):
         if commit:
             with transaction.atomic():  # Aseguramos que todo se guarde en una transacción
                 user.save()
-                my_logger.debug(f"Usuario {user.username} guardado.")
 
                 # Obtener el teléfono del formulario
                 telefono = self.cleaned_data.get('telefono')
-                my_logger.debug(f"Teléfono recibido: {telefono}")
 
                 # Validar y asignar el teléfono al perfil
                 if telefono:
@@ -76,7 +73,6 @@ class UserRegistrationForm(UserCreationForm):
                             user=user,
                             defaults={'telefono': telefono}
                         )
-                        my_logger.debug(f"Perfil {'creado' if created else 'actualizado'} para el usuario {user.username}. Teléfono guardado: {profile.telefono}")
                     except Exception as e:
                         my_logger.error(f"Error al guardar el teléfono para el usuario {user.username}: {str(e)}")
                 else:
